@@ -1,0 +1,30 @@
+@startuml
+actor Admin
+actor Instructor
+participant "Offerings Management System" as System
+
+Admin -> System: processOfferings(typeOfLesson, List<Lesson>, Schedule, true)
+activate System
+System -> System: createOffering()
+System -> Instructor: notifyNewOffering()
+
+Instructor -> System: viewOffering(offeringId)
+activate System
+System -> Instructor: displayOfferingDetails()
+
+Instructor -> System: takeOffering(offeringId)
+activate System
+
+alt Check Instructor and Offering Match
+    System -> System: checkInstructorAvailability(instructorId)
+    System -> System: checkOfferingAvailability(offeringId)
+
+    alt Offering Available (Success)
+        System -> System: assignInstructorToOffering(instructorId, offeringId)
+        System -> Instructor: returnSuccessMessage("Offer accepted")
+    else Offering Not Available (Failure)
+        System -> Instructor: returnFailureMessage("Offer not available or criteria not met")
+    end
+end
+deactivate System
+@enduml

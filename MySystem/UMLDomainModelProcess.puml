@@ -1,0 +1,72 @@
+@startuml
+!define PACKAGE_DIAGRAM
+
+package com._Project.MySystem {
+  package model {
+    class Client {
+      - clientId (Long)
+      - firstName
+      - lastName
+      - phoneNumber
+      - email
+      - age
+    }
+
+    class Booking {
+      - bookingId (UUID)
+      - startTime
+      - endTime
+      - isCancelled
+    }
+
+    class Offering {
+      - offeringId (Long)
+      - typeOfLesson
+      - isAvailable
+    }
+
+    class Lesson {
+      - lessonId
+      - details
+    }
+
+    class Location {
+      - locationId
+      - city
+    }
+
+    class Instructor {
+      - instructorId
+      - name
+    }
+
+    class Schedule {
+      - scheduleId
+      - details
+    }
+
+    Client "1" --* "many" Booking
+    Booking "many" --* "1" Offering
+    Offering "1" --* "many" Lesson
+    Offering "1" --* "1" Location
+    Offering "1" --* "1" Instructor
+    Offering "1" --* "1" Schedule
+    Client "1" --* "0..1" Client: guardian
+  }
+
+  package repository {
+    interface BookingRepository
+    interface ClientRepository
+    interface OfferingRepository
+  }
+
+  package service {
+    class BookingService
+  }
+
+  model --> repository
+  repository --> service
+
+}
+
+@enduml
