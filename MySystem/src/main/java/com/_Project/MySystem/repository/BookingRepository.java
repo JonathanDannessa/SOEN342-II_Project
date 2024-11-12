@@ -8,6 +8,5 @@ import java.util.List;
 import java.util.UUID;
 
 @Repository
-public interface BookingRepository extends JpaRepository<Booking, UUID> {
-    List<Booking> findByClient_ClientId(Long clientId);
+public interface BookingRepository extends JpaRepository<Booking, Long> {
 }

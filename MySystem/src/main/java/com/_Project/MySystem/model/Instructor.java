@@ -1,7 +1,8 @@
 package com._Project.MySystem.model;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import org.antlr.v4.runtime.misc.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,38 +10,44 @@ import java.util.List;
 @Entity
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
 public class Instructor {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long instructorId;
+    private Long id;
 
+    @NotNull
     private String firstName;
+    @NotNull
     private String lastName;
+    @NotNull
     private String phoneNumber;
+    @NotNull
     private String specialization;
+    @NotNull
     private String email;
     private String password;
+
     @ElementCollection
     private List<String> availableCities = new ArrayList<>();
 
-    @OneToMany(mappedBy = "instructor", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Offering> takenOnOfferings = new ArrayList<>();
+    @OneToMany(mappedBy = "instructor", fetch = FetchType.LAZY)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private List<Offering> offerings = new ArrayList<>();
 
-    public Instructor(String firstName, String lastName, String phoneNumber, String specialization, String email, String password) {
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.phoneNumber = phoneNumber;
-        this.specialization = specialization;
-        this.email = email;
-        this.password = password;
+    public boolean checkCities(String city) {
+        return availableCities.contains(city);
     }
 
-    public boolean isAvailableForOffering(String type, String city){
-        return (specialization.equals(type) && availableCities.contains(city));
-    }
-
-    public void takeOffering(Offering offering){
-        takenOnOfferings.add(offering);
+    @PreRemove
+    public void preRemove() {
+        for (Offering offering : offerings) {
+            offering.setInstructor(null);
+            offering.setInstructorApplied(false);
+            offering.setIsAvailable(false);
+        }
     }
 }
+

@@ -10,29 +10,23 @@ import java.util.UUID;
 
 @Entity
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 public class Booking {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID bookingId;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     private LocalTime startTime;
     private LocalTime endTime;
     private Boolean isCancelled;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.MERGE)
+    @JoinColumn(name = "client_id")
     private Client client;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.MERGE)
+    @JoinColumn(name = "offering_id")
     private Offering offering;
-
-    public Booking(Client client, Offering offering, LocalTime startTime, LocalTime endTime) {
-        this.client = client;
-        this.offering = offering;
-        this.startTime = startTime;
-        this.endTime = endTime;
-        this.isCancelled = false;
-    }
 }

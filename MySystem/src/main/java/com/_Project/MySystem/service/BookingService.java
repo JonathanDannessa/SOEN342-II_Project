@@ -8,11 +8,12 @@ import com._Project.MySystem.repository.ClientRepository;
 import com._Project.MySystem.repository.OfferingRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -20,7 +21,6 @@ public class BookingService {
     private final BookingRepository bookingRepository;
     private final ClientRepository clientRepository;
     private final OfferingRepository offeringRepository;
-
     public Booking makeBooking(Long clientId, Long offeringId, LocalTime startTime, LocalTime endTime) {
         Optional<Client> clientOptional = clientRepository.findById(clientId);
         Optional<Offering> offeringOptional = offeringRepository.findById(offeringId);
@@ -37,9 +37,17 @@ public class BookingService {
                 booking.setEndTime(endTime);
                 booking.setIsCancelled(false);
 
-                offering.setIsAvailable(false);
+                //offering.setIsAvailable(false);
 
-                return bookingRepository.save(booking);
+                Booking savedBooking = bookingRepository.save(booking);
+
+
+
+                clientRepository.save(client);
+
+                //offeringRepository.save(offering);
+
+                return savedBooking;
             } else {
                 throw new RuntimeException("Offering is not available");
             }
@@ -48,19 +56,17 @@ public class BookingService {
         }
     }
 
-    public List<Booking> getClientBookings(Long clientId) {
-        return bookingRepository.findByClient_ClientId(clientId);
-    }
 
-    public void cancelBooking(UUID bookingId) {
+    public void cancelBooking(Long bookingId) {
         Optional<Booking> bookingOptional = bookingRepository.findById(bookingId);
 
         if (bookingOptional.isPresent()) {
+            Client client = bookingOptional.get().getClient();
             Booking booking = bookingOptional.get();
-            booking.setIsCancelled(true);
             booking.getOffering().setIsAvailable(true);
-
-            bookingRepository.save(booking);
+            client.getBookings().remove(booking);
+            clientRepository.save(client);
+            bookingRepository.delete(booking);
         } else {
             throw new RuntimeException("Booking not found");
         }

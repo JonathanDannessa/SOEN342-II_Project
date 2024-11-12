@@ -1,9 +1,9 @@
 package com._Project.MySystem.model;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import org.antlr.v4.runtime.misc.NotNull;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -14,40 +14,29 @@ public class Client {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long clientId;
+    private Long id;
 
+    @NotNull
     private String firstName;
+    @NotNull
     private String lastName;
+    @NotNull
     private String phoneNumber;
+    @NotNull
     private String email;
     private Integer age;
     private String password;
 
     @ManyToOne
-    private Client guardian; // Legal guardian for underage clients
+    private Client guardian;
 
-    @OneToMany(mappedBy = "client")
-    private List<Booking> bookings;
+    @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private List<Booking> bookings = new ArrayList<>();
 
-    public Client(String firstName, String lastName, String phoneNumber, String email, Integer age,String password) {
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.phoneNumber = phoneNumber;
-        this.email = email;
-        this.age = age;
-        this.password = password;
-    }
-
-    public Client(String firstName, String lastName, String phoneNumber, String email, Integer age, String password ,Client guardian) {
-        this(firstName,lastName,phoneNumber,email,age,password);
-        this.guardian = guardian;
-    }
-
-    public boolean isUnderage() {
-        return age < 18;
-    }
-
-    public boolean hasGuardian() {
-        return guardian != null;
+    public Booking deleteBooking(Booking booking){
+        this.bookings.remove(booking);
+        return booking;
     }
 }
