@@ -1,8 +1,6 @@
 package com._Project.MySystem.model;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.antlr.v4.runtime.misc.NotNull;
 
 import java.time.LocalDate;
@@ -31,6 +29,8 @@ public class Schedule {
     @NotNull
     private LocalTime endTime;
 
-    @OneToMany(mappedBy = "schedule", cascade = CascadeType.MERGE, orphanRemoval = true)
+    @OneToMany(mappedBy = "schedule", cascade = CascadeType.MERGE, orphanRemoval = true,fetch = FetchType.EAGER)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private List<Offering> offerings = new ArrayList<>();
 }

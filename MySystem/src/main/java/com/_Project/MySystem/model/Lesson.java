@@ -25,7 +25,26 @@ public class Lesson {
     @NotNull
     private LocalTime endTime;
 
-    @ManyToOne(cascade = CascadeType.MERGE)
+    @ManyToOne(cascade = CascadeType.MERGE,fetch = FetchType.EAGER)
     @JoinColumn(name = "offering_id")
     private Offering offering;
+
+    @ManyToOne(cascade = CascadeType.MERGE,fetch = FetchType.EAGER)
+    @JoinColumn(name = "instructor_id")
+    private Instructor instructor;
+
+    // Flag to indicate if an instructor has been assigned to this lesson
+    private Boolean instructorAssigned = false;
+
+    private Boolean isBooked = false;
+
+    // Assign the instructor to the lesson and set instructorAssigned to true
+    public void assignInstructor(Instructor instructor, String city) {
+        if (!instructorAssigned && instructor.getSpecialization().equals(this.name) && instructor.checkCities(city)) {
+            this.instructor = instructor;
+            this.instructorAssigned = true;
+            this.offering.checkIfAvailableToPublic();
+        }
+    }
 }
+

@@ -20,13 +20,14 @@ public class Booking {
 
     private LocalTime startTime;
     private LocalTime endTime;
-    private Boolean isCancelled;
+    private Boolean isCancelled = false;
 
     @ManyToOne(cascade = CascadeType.MERGE)
     @JoinColumn(name = "client_id")
     private Client client;
 
     @ManyToOne(cascade = CascadeType.MERGE)
-    @JoinColumn(name = "offering_id")
-    private Offering offering;
+    @JoinColumn(name = "lesson_id")
+    private Lesson lesson;
 }
+

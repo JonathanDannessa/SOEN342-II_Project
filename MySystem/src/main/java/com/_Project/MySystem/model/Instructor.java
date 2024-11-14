@@ -29,25 +29,18 @@ public class Instructor {
     private String email;
     private String password;
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     private List<String> availableCities = new ArrayList<>();
 
-    @OneToMany(mappedBy = "instructor", fetch = FetchType.LAZY)
+    // Relationships for the lessons the instructor has chosen
+    @OneToMany(mappedBy = "instructor", fetch = FetchType.EAGER,cascade = CascadeType.PERSIST)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    private List<Offering> offerings = new ArrayList<>();
+    private List<Lesson> lessons = new ArrayList<>();
 
     public boolean checkCities(String city) {
         return availableCities.contains(city);
     }
 
-    @PreRemove
-    public void preRemove() {
-        for (Offering offering : offerings) {
-            offering.setInstructor(null);
-            offering.setInstructorApplied(false);
-            offering.setIsAvailable(false);
-        }
-    }
 }
 

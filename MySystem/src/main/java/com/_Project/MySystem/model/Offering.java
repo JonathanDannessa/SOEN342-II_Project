@@ -2,9 +2,7 @@ package com._Project.MySystem.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.antlr.v4.runtime.misc.NotNull;
 
 import java.util.ArrayList;
@@ -23,28 +21,27 @@ public class Offering {
     @NotNull
     private String typeOfLesson;
     private Boolean isAvailable;
-    private Boolean instructorApplied;
 
-    @ManyToOne(cascade = CascadeType.MERGE)
-    @JoinColumn(name = "instructor_id")
-    private Instructor instructor;
+    // New flag to indicate if the offering should be shown to the public
+    private Boolean availableToPublic = false;
 
-    @ManyToOne(cascade = CascadeType.MERGE)
+    @ManyToOne(cascade = CascadeType.MERGE,fetch = FetchType.EAGER)
     @JoinColumn(name = "location_id")
     private Location location;
 
-    @OneToMany(mappedBy = "offering", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "offering", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private List<Lesson> lessons = new ArrayList<>();
 
-    @ManyToOne(cascade = CascadeType.MERGE)
+    @ManyToOne(cascade = CascadeType.MERGE,fetch = FetchType.EAGER)
     @JoinColumn(name = "schedule_id")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private Schedule schedule;
 
-    public void verifyAndSetInstructor(Instructor instructor,String specialization, String city) {
-        if(!instructorApplied && instructor.getSpecialization().equals(specialization) && instructor.checkCities(city) ) {
-            instructorApplied = true;
-            isAvailable = true;
-            this.instructor = instructor;
-        }
+    // Method to check if any lessons have been assigned an instructor
+    public void checkIfAvailableToPublic() {
+        this.availableToPublic = lessons.stream().anyMatch(Lesson::getInstructorAssigned);
     }
 }

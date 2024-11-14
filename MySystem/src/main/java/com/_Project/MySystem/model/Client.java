@@ -35,7 +35,7 @@ public class Client {
     @EqualsAndHashCode.Exclude
     private List<Booking> bookings = new ArrayList<>();
 
-    public Booking deleteBooking(Booking booking){
+    public Booking deleteBooking(Booking booking) {
         this.bookings.remove(booking);
         return booking;
     }
