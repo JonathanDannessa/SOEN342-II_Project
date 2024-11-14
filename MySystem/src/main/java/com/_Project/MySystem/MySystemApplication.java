@@ -43,34 +43,36 @@ public class MySystemApplication implements CommandLineRunner {
 
 	public void run(String... args) throws Exception {
 		Scanner scan = new Scanner(System.in);
-//		System.out.println("Welcome to our organization's website\n");
-//		while (true) {
-//			System.out.println("What would you like to do?");
-//			System.out.println("Press 1: Sign in");
-//			System.out.println("Press 2: Sign up");
-//			System.out.println("Press 3: View our available offerings");
-//			System.out.println("Press 4: Exit application");
-//
-//			System.out.print("Enter your choice: ");
-//			int choice = Integer.parseInt(scan.nextLine());
-//			switch (choice) {
-//				case 1: // Sign in
-//					signIn(scan);
-//					break;
-//				case 2: // Sign up
-//					//signUp(scan);
-//					break;
-//				case 3:
-//					// View offerings logic
-//					break;
-//				case 4: // Exit application
-//					return;
-//				default:
-//					System.out.println("Invalid choice, try again");
-//					break;
-//			}
-//			System.out.println();
-//		}
+		System.out.println("Welcome to our organization's website\n");
+		while (true) {
+			System.out.println("What would you like to do?");
+			System.out.println("Press 1: Sign in");
+			System.out.println("Press 2: Sign up");
+			System.out.println("Press 3: View our available offerings");
+			System.out.println("Press 4: Exit application");
+
+			System.out.print("Enter your choice: ");
+			int choice = Integer.parseInt(scan.nextLine());
+			switch (choice) {
+				case 1:
+					signIn(scan);
+					break;
+				case 2:
+					signUp(scan);
+					break;
+				case 3:
+					getAllOfferingsWithInstructors();
+					System.out.println("\nMust sign in as a client in order to make a booking ...\n");
+					break;
+				case 4:
+					System.out.println("Thank you for using the application!");
+					return;
+				default:
+					System.out.println("Invalid choice, try again");
+					break;
+			}
+			System.out.println();
+		}
 
 
 
@@ -91,25 +93,26 @@ public class MySystemApplication implements CommandLineRunner {
 			case 1:
 				Client client = signInAsClient(scan);
 				if (client != null) {
-					System.out.println("Welcome " + client.getFirstName());
+					System.out.println("\nWelcome " + client.getFirstName());
 					clientActionsMenu(client, scan);
 				}
 				break;
 			case 2:
 				Instructor instructor = signInAsInstructor(scan);
 				if (instructor != null) {
-					System.out.println("Welcome " + instructor.getFirstName());
+					System.out.println("\nWelcome " + instructor.getFirstName());
 					instructorActionsMenu(instructor,scan);
 				}
 				break;
 			case 3:
 				Admin admin = signInAsAdmin(scan);
 				if (admin != null) {
-					System.out.println("Welcome Admin...");
+					System.out.println("\nWelcome Admin...");
 					adminActionsMenu(scan);
 				}
 				break;
-			case 4: // Return
+			case 4:
+				System.out.println("\nReturning to the main menu...\n");
 				return;
 			default:
 				System.out.println("Invalid choice, try again");
@@ -117,14 +120,127 @@ public class MySystemApplication implements CommandLineRunner {
 		}
 	}
 
+	public void signUp(Scanner scan) {
+		System.out.println("Sign up as: ");
+		System.out.println("Press 1: Client");
+		System.out.println("Press 2: Instructor");
+		System.out.println("Press 3: Return to main menu");
+		System.out.print("Enter your choice: ");
+		int signUpChoice = Integer.parseInt(scan.nextLine());
+
+		switch (signUpChoice) {
+			case 1:
+				Client client = signUpAsClient(scan);
+				if (client != null) {
+					System.out.println("Welcome, " + client.getFirstName() + "! Your client account has been created.");
+					clientActionsMenu(client, scan);
+				}
+				break;
+			case 2:
+				Instructor instructor = signUpAsInstructor(scan);
+				if (instructor != null) {
+					System.out.println("Welcome, " + instructor.getFirstName() + "! Your instructor account has been created.");
+					instructorActionsMenu(instructor,scan);
+				}
+				break;
+			case 3:
+				System.out.println("Returning to main menu...");
+				return;
+			default:
+				System.out.println("Invalid choice, try again.");
+				break;
+		}
+	}
+
+	private Client signUpAsClient(Scanner scan) {
+		System.out.print("\nEnter your first name: ");
+		String firstName = scan.nextLine();
+		System.out.print("Enter your last name: ");
+		String lastName = scan.nextLine();
+		System.out.print("Enter your phone number: ");
+		String phoneNumber = scan.nextLine();
+		System.out.print("Enter your email: ");
+		String email = scan.nextLine();
+		System.out.print("Enter your age: ");
+		int age = Integer.parseInt(scan.nextLine());
+		System.out.print("Enter your password: ");
+		String password = scan.nextLine();
+
+		Client guardian = null;
+		if (age < 18) {
+			System.out.print("\nYou are underage. A guardian account will also be created.\n\n");
+			System.out.print("Enter guardian's first name: ");
+			String guardianFirstName = scan.nextLine();
+			System.out.print("Enter guardian's last name: ");
+			String guardianLastName = scan.nextLine();
+			System.out.print("Enter guardian's age: ");
+			Integer guardianAge = Integer.parseInt(scan.nextLine());
+			System.out.print("Enter guardian's phone number: ");
+			String guardianPhoneNumber = scan.nextLine();
+			System.out.print("Enter guardian's email: ");
+			String guardianEmail = scan.nextLine();
+			System.out.print("Enter guardian's password: ");
+			String guardianPassword = scan.nextLine();
+
+			guardian = new Client();
+			guardian.setFirstName(guardianFirstName);
+			guardian.setLastName(guardianLastName);
+			guardian.setPhoneNumber(guardianPhoneNumber);
+			guardian.setAge(guardianAge);
+			guardian.setEmail(guardianEmail);
+			guardian.setPassword(guardianPassword);
+			guardian = clientRepository.save(guardian);
+			System.out.println("\nGuardian account created successfully.\n");
+		}
+
+		Client client = new Client();
+		client.setFirstName(firstName);
+		client.setLastName(lastName);
+		client.setPhoneNumber(phoneNumber);
+		client.setAge(age);
+		client.setEmail(email);
+		client.setPassword(password);
+		client.setGuardian(guardian);
+		return clientRepository.save(client);
+	}
+
+	private Instructor signUpAsInstructor(Scanner scan) {
+		System.out.print("Enter your first name: ");
+		String firstName = scan.nextLine();
+		System.out.print("Enter your last name: ");
+		String lastName = scan.nextLine();
+		System.out.print("Enter your phone number: ");
+		String phoneNumber = scan.nextLine();
+		System.out.print("Enter your email: ");
+		String email = scan.nextLine();
+		System.out.print("Enter your password: ");
+		String password = scan.nextLine();
+		System.out.print("Enter your specialization: ");
+		String specialization = scan.nextLine();
+
+		System.out.print("Enter the cities where you are available (comma-separated): ");
+		String citiesInput = scan.nextLine();
+		List<String> availableCities = List.of(citiesInput.split(",\\s*")); // Split by comma and optional space
+
+
+		Instructor instructor = new Instructor();
+		instructor.setFirstName(firstName);
+		instructor.setLastName(lastName);
+		instructor.setPhoneNumber(phoneNumber);
+		instructor.setEmail(email);
+		instructor.setPassword(password);
+		instructor.setSpecialization(specialization);
+		instructor.setAvailableCities(availableCities);
+		return instructorRepository.save(instructor);
+	}
+
 	public Client signInAsClient(Scanner scan) {
-		System.out.println("Please enter your sign in credentials");
+		System.out.println("\nPlease enter your sign in credentials");
 		System.out.print("Enter your email: ");
 		String email = scan.nextLine();
 		System.out.print("Enter your password: ");
 		String password = scan.nextLine();
 
-		// Find client by email and verify password
 		Client client = clientRepository.findByEmail(email).orElse(null);
 		if (client != null && client.getPassword().equals(password)) {
 			return client; // Return client object if credentials match
@@ -137,7 +253,7 @@ public class MySystemApplication implements CommandLineRunner {
 	private void clientActionsMenu(Client client, Scanner scan) {
 
 		while (true) {
-			System.out.println("\nWhat would you like to do?");
+			System.out.println("\n\nWhat would you like to do?");
 			System.out.println("1: View your bookings");
 			System.out.println("2: Cancel a booking");
 			System.out.println("3: Make a new booking");
@@ -161,7 +277,7 @@ public class MySystemApplication implements CommandLineRunner {
 					System.out.println("\n\n Returning to main menu...\n");
 					return;
 				default:
-					System.out.println("Invalid choice, please try again.");
+					System.out.println("\nInvalid choice, please try again.\n");
 					break;
 			}
 		}
@@ -174,7 +290,8 @@ public class MySystemApplication implements CommandLineRunner {
 			System.out.println("1: View available offerings");
 			System.out.println("2: Select an available offering");
 			System.out.println("3: Cancel offering");
-			System.out.println("4: Return to main menu");
+			System.out.println("4: View accepted offerings");
+			System.out.println("5: Return to main menu");
 			System.out.print("Enter your choice: ");
 			int actionChoice = Integer.parseInt(scan.nextLine());
 
@@ -190,10 +307,13 @@ public class MySystemApplication implements CommandLineRunner {
 					cancelLesson(instructor,scan);
 					break;
 				case 4:
+					viewInstructorsOfferings(instructor);
+					break;
+				case 5:
 					System.out.println("\n\n Returning to main menu...\n");
 					return;
 				default:
-					System.out.println("Invalid choice, please try again.");
+					System.out.println("\nInvalid choice, please try again.\n");
 					break;
 			}
 		}
