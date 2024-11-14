@@ -206,20 +206,20 @@ public class MySystemApplication implements CommandLineRunner {
 
 	private Instructor signUpAsInstructor(Scanner scan) {
 		System.out.print("Enter your first name: ");
-		String firstName = scan.nextLine();
+		String firstName = scan.nextLine().trim();
 		System.out.print("Enter your last name: ");
-		String lastName = scan.nextLine();
+		String lastName = scan.nextLine().trim();
 		System.out.print("Enter your phone number: ");
-		String phoneNumber = scan.nextLine();
+		String phoneNumber = scan.nextLine().trim();
 		System.out.print("Enter your email: ");
-		String email = scan.nextLine();
+		String email = scan.nextLine().trim();
 		System.out.print("Enter your password: ");
-		String password = scan.nextLine();
+		String password = scan.nextLine().trim();
 		System.out.print("Enter your specialization: ");
-		String specialization = scan.nextLine();
+		String specialization = scan.nextLine().trim();
 
 		System.out.print("Enter the cities where you are available (comma-separated): ");
-		String citiesInput = scan.nextLine();
+		String citiesInput = scan.nextLine().trim();
 		List<String> availableCities = List.of(citiesInput.split(",\\s*")); // Split by comma and optional space
 
 
@@ -237,9 +237,9 @@ public class MySystemApplication implements CommandLineRunner {
 	public Client signInAsClient(Scanner scan) {
 		System.out.println("\nPlease enter your sign in credentials");
 		System.out.print("Enter your email: ");
-		String email = scan.nextLine();
+		String email = scan.nextLine().trim();
 		System.out.print("Enter your password: ");
-		String password = scan.nextLine();
+		String password = scan.nextLine().trim();
 
 		Client client = clientRepository.findByEmail(email).orElse(null);
 		if (client != null && client.getPassword().equals(password)) {
@@ -358,9 +358,9 @@ public class MySystemApplication implements CommandLineRunner {
 	public Instructor signInAsInstructor(Scanner scan) {
 		System.out.println("Please enter your sign in credentials");
 		System.out.print("Enter your email: ");
-		String email = scan.nextLine();
+		String email = scan.nextLine().trim();
 		System.out.print("Enter your password: ");
-		String password = scan.nextLine();
+		String password = scan.nextLine().trim();
 
 		Instructor instructor = instructorRepository.findByEmail(email);
 		if (instructor != null && instructor.getPassword().equals(password)) {
@@ -375,9 +375,9 @@ public class MySystemApplication implements CommandLineRunner {
 	public Admin signInAsAdmin(Scanner scan) {
 		System.out.println("Please enter your sign in credentials");
 		System.out.print("Enter your email: ");
-		String email = scan.nextLine();
+		String email = scan.nextLine().trim();
 		System.out.print("Enter your password: ");
-		String password = scan.nextLine();
+		String password = scan.nextLine().trim();
 
 		// Admin hardcoded credentials check
 		if (email.equals("admin@FakeEmail.com") && password.equals("admin")) {
@@ -505,7 +505,7 @@ public class MySystemApplication implements CommandLineRunner {
 
 		// Get type of lesson
 		System.out.print("Enter the type of lesson (e.g., Yoga, Music): ");
-		offering.setTypeOfLesson(scanner.nextLine());
+		offering.setTypeOfLesson(scanner.nextLine().trim());
 
 		// Set availability of the offering to true initially
 		offering.setIsAvailable(true);
@@ -520,7 +520,7 @@ public class MySystemApplication implements CommandLineRunner {
 		schedule.setEndDate(LocalDate.parse(scanner.nextLine()));
 
 		System.out.print("Enter the day of the week (e.g., Monday): ");
-		schedule.setDayOfWeek(scanner.nextLine());
+		schedule.setDayOfWeek(scanner.nextLine().trim());
 
 		System.out.print("Enter the start time (HH:mm, 24-hour format): ");
 		schedule.setStartTime(LocalTime.parse(scanner.nextLine()));
@@ -536,10 +536,10 @@ public class MySystemApplication implements CommandLineRunner {
 		Location location = new Location();
 
 		System.out.print("Enter the location name: ");
-		location.setName(scanner.nextLine());
+		location.setName(scanner.nextLine().trim());
 
 		System.out.print("Enter the city: ");
-		location.setCity(scanner.nextLine());
+		location.setCity(scanner.nextLine().trim());
 
 		// Save the location to the database and associate it with the offering
 		location = locationRepository.save(location);
@@ -551,10 +551,10 @@ public class MySystemApplication implements CommandLineRunner {
 		do {
 			Lesson lesson = new Lesson();
 
-			lesson.setName(offering.getTypeOfLesson());
+			lesson.setName(offering.getTypeOfLesson().trim());
 
 			System.out.print("Is this a private lesson? (yes/no): ");
-			lesson.setIsPrivateLesson(scanner.nextLine().equalsIgnoreCase("yes"));
+			lesson.setIsPrivateLesson(scanner.nextLine().trim().equalsIgnoreCase("yes"));
 
 			System.out.print("Enter lesson start time (HH:mm, 24-hour format): ");
 			lesson.setStartTime(LocalTime.parse(scanner.nextLine()));
@@ -572,7 +572,7 @@ public class MySystemApplication implements CommandLineRunner {
 			lessons.add(lesson);
 
 			System.out.print("Would you like to add another lesson? (yes/no): ");
-			addMoreLessons = scanner.nextLine();
+			addMoreLessons = scanner.nextLine().trim();
 		} while (addMoreLessons.equalsIgnoreCase("yes"));
 
 		// Assign the lessons list to the offering
@@ -730,27 +730,30 @@ public class MySystemApplication implements CommandLineRunner {
 	public void getAllOfferingsWithInstructors() {
 		List<Offering> offerings = offeringRepository.findAll();
 		for (Offering offer : offerings) {
-			System.out.println("\nWe offer private and group " + offer.getTypeOfLesson() + " in " + offer.getLocation().getName() +
-					" on " + offer.getSchedule().getDayOfWeek() + "'s from " + offer.getSchedule().getStartTime() + " to " +
-					offer.getSchedule().getEndTime() + " from " + offer.getSchedule().getStartDate() + " to " +
-					offer.getSchedule().getEndDate() + " as follows:\n");
+			boolean hasInstructor = offer.getLessons().stream().anyMatch(Lesson::getInstructorAssigned);
 
-			for (Lesson lesson : offer.getLessons()) {
-				if (lesson.getInstructorAssigned()) {
-					System.out.println("Lesson ID: " + lesson.getId() + " | Time: " + lesson.getStartTime() + "-" + lesson.getEndTime() +
-							" | " + (lesson.getIsPrivateLesson() ? "Private" : "Group") +
-							" | Instructor: " + lesson.getInstructor().getFirstName() + " " + lesson.getInstructor().getLastName() +
-							(lesson.getIsBooked() ? " (Unavailable)" : " (Available)"));
+			if (hasInstructor) {
+				System.out.println("\nWe offer private and group " + offer.getTypeOfLesson() + " in " + offer.getLocation().getName() +
+						" on " + offer.getSchedule().getDayOfWeek() + "'s from " + offer.getSchedule().getStartTime() + " to " +
+						offer.getSchedule().getEndTime() + " from " + offer.getSchedule().getStartDate() + " to " +
+						offer.getSchedule().getEndDate() + " as follows:\n");
+
+				for (Lesson lesson : offer.getLessons()) {
+					if (lesson.getInstructorAssigned()) {
+						System.out.println("Lesson ID: " + lesson.getId() + " | Time: " + lesson.getStartTime() + "-" + lesson.getEndTime() +
+								" | " + (lesson.getIsPrivateLesson() ? "Private" : "Group") +
+								" | Instructor: " + lesson.getInstructor().getFirstName() + " " + lesson.getInstructor().getLastName() +
+								(lesson.getIsBooked() ? " (Unavailable)" : " (Available)"));
+					}
 				}
 			}
 		}
 	}
 
 	public void deleteInstructor(Scanner scan) {
-		System.out.println("Enter the instructor email to delete:");
-		String instructorEmail = scan.nextLine();
+		System.out.print("Enter the instructor email to delete: ");
+		String instructorEmail = scan.nextLine().trim();
 
-		// Find the instructor by email
 		Instructor instructor = instructorRepository.findByEmail(instructorEmail);
 		if (instructor != null) {
 			List<Booking> bookings = bookingRepository.findAll().stream()
@@ -762,7 +765,7 @@ public class MySystemApplication implements CommandLineRunner {
 				Lesson lesson = booking.getLesson();
 				lesson.setInstructor(null);
 				lesson.setInstructorAssigned(false);
-
+				lesson.setIsBooked(false);
 				Client client = booking.getClient();
 				if (client != null) {
 					client.getBookings().remove(booking);
@@ -776,22 +779,23 @@ public class MySystemApplication implements CommandLineRunner {
 			for (Lesson lesson : instructorLessons) {
 					lesson.setInstructor(null);
 					lesson.setInstructorAssigned(false);
-					lessonRepository.save(lesson); // Save the updated lesson without an instructor
-
-					System.out.println("Lesson with ID " + lesson.getId() + " had no bookings and has been cancelled.");
-					return; // Exit after cancelling the selected lesson
+					lesson.setIsBooked(false);
+					lessonRepository.save(lesson);
 				}
-			}
+
 
 			instructorRepository.delete(instructor);
 
 			System.out.println("Instructor and their lessons have been updated.");
+			return;
+		}
+		System.out.println("Instructor not found.");
 		}
 
 
 	public void deleteClient(Scanner scan) {
-		System.out.println("Enter the client email to delete:");
-		String clientEmail = scan.nextLine();
+		System.out.print("Enter the client email to delete: ");
+		String clientEmail = scan.nextLine().trim();
 
 		// Find the client by email
 		Optional<Client> clientOpt = clientRepository.findByEmail(clientEmail);
