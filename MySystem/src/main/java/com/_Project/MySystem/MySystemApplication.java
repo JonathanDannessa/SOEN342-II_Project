@@ -2,18 +2,16 @@ package com._Project.MySystem;
 
 import com._Project.MySystem.model.*;
 import com._Project.MySystem.repository.*;
-import jakarta.annotation.PostConstruct;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @SpringBootApplication
 @RequiredArgsConstructor(onConstructor_ = {@Autowired})
@@ -55,12 +53,15 @@ public class MySystemApplication implements CommandLineRunner {
 			int choice = Integer.parseInt(scan.nextLine());
 			switch (choice) {
 				case 1:
+					System.out.println("\n\n");
 					signIn(scan);
 					break;
 				case 2:
+					System.out.println("\n\n");
 					signUp(scan);
 					break;
 				case 3:
+					System.out.println("\n\n");
 					getAllOfferingsWithInstructors();
 					System.out.println("\nMust sign in as a client in order to make a booking ...\n");
 					break;
@@ -69,6 +70,7 @@ public class MySystemApplication implements CommandLineRunner {
 					return;
 				default:
 					System.out.println("Invalid choice, try again");
+					System.out.println("\n\n");
 					break;
 			}
 			System.out.println();
@@ -132,19 +134,19 @@ public class MySystemApplication implements CommandLineRunner {
 			case 1:
 				Client client = signUpAsClient(scan);
 				if (client != null) {
-					System.out.println("Welcome, " + client.getFirstName() + "! Your client account has been created.");
+					System.out.println("\nWelcome, " + client.getFirstName() + "! Your client account has been created.");
 					clientActionsMenu(client, scan);
 				}
 				break;
 			case 2:
 				Instructor instructor = signUpAsInstructor(scan);
 				if (instructor != null) {
-					System.out.println("Welcome, " + instructor.getFirstName() + "! Your instructor account has been created.");
+					System.out.println("\nWelcome, " + instructor.getFirstName() + "! Your instructor account has been created.");
 					instructorActionsMenu(instructor,scan);
 				}
 				break;
 			case 3:
-				System.out.println("Returning to main menu...");
+				System.out.println("\nReturning to main menu...");
 				return;
 			default:
 				System.out.println("Invalid choice, try again.");
@@ -205,7 +207,7 @@ public class MySystemApplication implements CommandLineRunner {
 	}
 
 	private Instructor signUpAsInstructor(Scanner scan) {
-		System.out.print("Enter your first name: ");
+		System.out.print("\nEnter your first name: ");
 		String firstName = scan.nextLine().trim();
 		System.out.print("Enter your last name: ");
 		String lastName = scan.nextLine().trim();
@@ -267,7 +269,7 @@ public class MySystemApplication implements CommandLineRunner {
 					break;
 				case 2:
 					viewBookings(client.getEmail());
-					deleteBooking(scan);
+					deleteBooking(client,scan);
 					break;
 				case 3:
 					viewBookings(client.getEmail());
@@ -324,10 +326,11 @@ public class MySystemApplication implements CommandLineRunner {
 		while (true) {
 			System.out.println("\nAdmin Actions:");
 			System.out.println("1: Create a new offering");
-			System.out.println("2: Delete a booking");
-			System.out.println("3: Delete a client");
-			System.out.println("4: Delete an instructor");
-			System.out.println("5: Return to main menu");
+			System.out.println("2: View clients bookings");
+			System.out.println("3: Delete a booking");
+			System.out.println("4: Delete a client");
+			System.out.println("5: Delete an instructor");
+			System.out.println("6: Return to main menu");
 			System.out.print("Enter your choice: ");
 			int actionChoice = Integer.parseInt(scan.nextLine());
 
@@ -336,17 +339,22 @@ public class MySystemApplication implements CommandLineRunner {
 					createOffering(scan);
 					break;
 				case 2:
-					deleteBooking(scan);
+					System.out.print("\n\nEnter the email of the client you would like to view their bookings: ");
+					viewBookings(scan.nextLine().trim());
 					break;
 				case 3:
-					deleteClient(scan);
+					System.out.print("\n\nEnter the email of the client you would like to delete one of their bookings: ");
+					deleteBooking(clientRepository.findByEmail(scan.nextLine().trim()).get(),scan);
 					break;
 				case 4:
-					deleteInstructor(scan);
+					deleteClient(scan);
 					break;
 				case 5:
+					deleteInstructor(scan);
+					break;
+				case 6:
 					System.out.println("\nReturning to main menu...\n");
-					return; // Return to main menu
+					return;
 				default:
 					System.out.println("Invalid choice, please try again.");
 					break;
@@ -430,9 +438,13 @@ public class MySystemApplication implements CommandLineRunner {
 		System.out.println("============================================================================================================================================");
 	}
 
-	public void deleteBooking(Scanner scanner) {
+	public void deleteBooking(Client client,Scanner scanner) {
 
-		// Step 2: Ask the user to input the booking ID they wish to delete
+		if(client.getBookings().isEmpty()) {
+			System.out.println("You have no bookings ...\n\n");
+			return;
+		}
+
 		System.out.print("Enter the booking ID you would like to delete: ");
 		Long bookingId = Long.parseLong(scanner.nextLine());
 
@@ -443,15 +455,13 @@ public class MySystemApplication implements CommandLineRunner {
 			return;
 		}
 
-		// Step 5: Remove the booking from the client
-		Client client = bookingToDelete.getClient();
 		client.getBookings().remove(bookingToDelete);
-		clientRepository.save(client); // Save the updated client information
+		clientRepository.save(client);
 
-		// Step 6: Set the associated lesson's availability back to true
+
 		Lesson lesson = bookingToDelete.getLesson();
-		lesson.setIsBooked(false);  // Mark the lesson as available again
-		lessonRepository.save(lesson);  // Save the updated lesson information
+		lesson.setIsBooked(false);
+		lessonRepository.save(lesson);
 
 		// Step 7: Delete the booking from the booking repository
 		bookingRepository.delete(bookingToDelete);
@@ -463,15 +473,21 @@ public class MySystemApplication implements CommandLineRunner {
 
 
 	public Booking createBooking(Client client, Scanner scanner) {
+		List<Lesson> availableLessons = lessonRepository.findByIsBooked(false);
+
+		if (availableLessons.isEmpty()) {
+			System.out.println("\nThere are no available offerings at the moment. Please check back later.\n");
+			return null;
+		}
 		getAllOfferingsWithInstructors();
 
-		// Step 3: Prompt the client to select a lesson
+
 		System.out.print("\n\nEnter the number of the lesson you want to book: ");
 		Long lessonChoice = Long.parseLong(scanner.nextLine());
 
 		Lesson selectedLesson = lessonRepository.findById(lessonChoice).get();
 
-		// Step 4: Check if the lesson is already booked
+
 		if (selectedLesson.getIsBooked()) {
 			System.out.println("This lesson is already booked. Please select another lesson.");
 			return null;
@@ -479,10 +495,10 @@ public class MySystemApplication implements CommandLineRunner {
 
 		Booking booking = new Booking();
 		booking.setClient(client);
-		booking.setLesson(selectedLesson); // Associate the lesson's offering with the booking
+		booking.setLesson(selectedLesson);
 		booking.setStartTime(selectedLesson.getStartTime());
 		booking.setEndTime(selectedLesson.getEndTime());
-		booking.setIsCancelled(false); // By default, booking is not cancelled
+		booking.setIsCancelled(false);
 
 		booking = bookingRepository.save(booking);
 
@@ -597,6 +613,10 @@ public class MySystemApplication implements CommandLineRunner {
 	}
 
 	public void viewInstructorsOfferings(Instructor instructor) {
+		if (instructor.getLessons() == null || instructor.getLessons().isEmpty()) {
+			System.out.println("This instructor has no accepted offers to view.");
+			return;
+		}
 		for (Lesson lesson : instructor.getLessons()) {
 			if (lesson.getInstructorAssigned()) {
 				String lessonInfo = "Lesson ID: " + lesson.getId() +
@@ -616,6 +636,11 @@ public class MySystemApplication implements CommandLineRunner {
 		}
 	}
 	public void cancelLesson(Instructor instructor, Scanner scanner) {
+		if (instructor.getLessons() == null || instructor.getLessons().isEmpty()) {
+			System.out.println("This instructor has no lessons to cancel.");
+			return;
+		}
+
 		System.out.print("\n\nSelect ID of lesson you would like to cancel: ");
 		Long lesson_id = Long.parseLong(scanner.nextLine());
 
@@ -641,13 +666,11 @@ public class MySystemApplication implements CommandLineRunner {
 					clientRepository.save(client);
 				}
 
-
 				bookingRepository.delete(booking);
 				System.out.println("Booking for lesson ID " + lesson_id + " has been cancelled.");
 			}
-
-
 		}
+
 		lessonToRemove.setIsBooked(false);
 		lessonToRemove.setInstructorAssigned(false);
 		lessonToRemove.setInstructor(null);
@@ -659,8 +682,17 @@ public class MySystemApplication implements CommandLineRunner {
 	}
 
 
+
 	public void selectLesson(Instructor instructor, Scanner scanner) {
 		viewAllOfferingsWithNoInstructors();
+		List<Offering> offerings = offeringRepository.findAll();
+		boolean hasUnassignedLessons = offerings.stream()
+				.flatMap(offer -> offer.getLessons().stream())
+				.anyMatch(lesson -> !lesson.getInstructorAssigned());
+
+		if (!hasUnassignedLessons) {
+			return;
+		}
 
 		System.out.print("\n\nInput the ID of the lesson you would like to accept: ");
 		Long lessonId;
@@ -709,6 +741,16 @@ public class MySystemApplication implements CommandLineRunner {
 
 	public void viewAllOfferingsWithNoInstructors() {
 		List<Offering> offerings = offeringRepository.findAll();
+
+		boolean hasUnassignedLessons = offerings.stream()
+				.flatMap(offer -> offer.getLessons().stream())
+				.anyMatch(lesson -> !lesson.getInstructorAssigned());
+
+		if (!hasUnassignedLessons) {
+			System.out.println("There are no offerings with unassigned instructors at the moment.");
+			return;
+		}
+
 		for (Offering offer : offerings) {
 			System.out.println("\nWe offer private and group " + offer.getTypeOfLesson() + " in " + offer.getLocation().getName() +
 					" on " + offer.getSchedule().getDayOfWeek() + "'s from " + offer.getSchedule().getStartTime() + " to " +
@@ -725,6 +767,7 @@ public class MySystemApplication implements CommandLineRunner {
 			}
 		}
 	}
+
 
 
 	public void getAllOfferingsWithInstructors() {
@@ -803,30 +846,54 @@ public class MySystemApplication implements CommandLineRunner {
 		if (clientOpt.isPresent()) {
 			Client client = clientOpt.get();
 
-			// Create a list to hold the bookings to be removed
-			List<Booking> bookingsToDelete = new ArrayList<>(client.getBookings());
+			// Check if client has a guardian
+			if (client.getGuardian() != null) {
+				// Find the guardian by the guardian ID
+				Optional<Client> guardianOpt = clientRepository.findById(client.getGuardian().getId());
 
-			// Iterate over the bookings and delete each one
+				if (guardianOpt.isPresent()) {
+					Client guardian = guardianOpt.get();
+
+					// Delete all bookings of the guardian
+					List<Booking> guardianBookingsToDelete = new ArrayList<>(guardian.getBookings());
+					for (Booking booking : guardianBookingsToDelete) {
+						Lesson lesson = booking.getLesson();
+						if (lesson != null) {
+							lesson.setIsBooked(false);
+							lessonRepository.save(lesson);
+						}
+						bookingRepository.delete(booking);
+					}
+
+					guardian.getBookings().clear();
+					clientRepository.save(guardian);
+
+					clientRepository.delete(guardian);
+					System.out.println("Guardian and their bookings have also been deleted.");
+				}
+			}
+
+			List<Booking> bookingsToDelete = new ArrayList<>(client.getBookings());
 			for (Booking booking : bookingsToDelete) {
 				Lesson lesson = booking.getLesson();
 				if (lesson != null) {
 					lesson.setIsBooked(false);
 					lessonRepository.save(lesson);
 				}
-
 				bookingRepository.delete(booking);
 			}
 
 			client.getBookings().clear();
 			clientRepository.save(client);
 
+			// Delete the client
 			clientRepository.delete(client);
-
 			System.out.println("Client and their bookings have been deleted.");
 		} else {
 			System.out.println("Client not found.");
 		}
 	}
+
 
 
 

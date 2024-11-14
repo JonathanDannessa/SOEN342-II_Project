@@ -4,3 +4,9 @@ insert into admin (email,password,id) values (?,?,default) [42104-224]
 2024-11-13 20:13:26.858275-05:00 jdbc[13]: exception
 org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "CLIENTS" not found; SQL statement:
 DELETE FROM clients [42102-224]
+2024-11-14 16:08:20.643196-05:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "Delete [*]* from instructor"; expected "identifier"; SQL statement:
+Delete * from instructor [42001-224]
+2024-11-14 16:09:09.078472-05:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "AVAILABLE_CITIES" not found; SQL statement:
+delete from available_cities [42102-224]
