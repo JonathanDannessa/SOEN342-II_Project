@@ -1,0 +1,91 @@
+**System Operations**
+
+  1. viewAvailableOfferings()
+  Description: Retrieves a list of offerings available for booking.
+  Actor: Client
+
+  2. selectOfferingForBooking(offeringId)
+  Description: Allows the Client to select a specific offering they want to book.
+  Actor: Client
+
+  3. checkClientEligibility(clientId, offeringId)
+  Description: Checks if the Client meets the age requirements.
+  Actor: System
+
+  4. checkBookingAvailability(offeringId)
+  Description: Checks if the selected offering is available for booking.
+  Actor: Client
+
+  5. createBooking(clientId, offeringId)
+  Description: Creates a booking for the Client for the selected offering and updates the availability of the offering.
+  Actor: Client
+
+  6. cancelBooking(bookingId)
+  Description: Allows the Client to cancel an existing booking.
+  Actor: Client
+
+  7. returnBookingSuccessMessage()
+  Description: Sends a success message to the Client if the booking has been successfully created.
+  Actor: Client
+
+  8. returnBookingFailureMessage()
+  Description: Sends a failure message to the Client if the booking could not be completed (e.g., due to availability issues).
+  Actor: Client
+
+**Operation Contracts**
+
+  Operation: viewAvailableOfferings()
+  Cross References: Use case: "Process Bookings"
+  Preconditions: The system has valid offerings available for booking.
+  Postconditions:
+    1.) A list of available offerings is generated.
+    2.) The system presents the list to the Client.
+
+  Operation: selectOfferingForBooking(offeringId)
+  Cross References: Use case: "Process Bookings"
+  Preconditions: The system has provided a valid list of available offerings.
+  Postconditions:
+    1.) The offering is selected for processing.
+    2.) The system proceeds to check client eligibility and booking availability.
+
+  Operation: checkClientEligibility(clientId, offeringId)
+  Cross References: Use case: "Process Bookings"
+  Preconditions: The Client has selected an offering.
+  Postconditions:
+    1.) The system checks if the Client meets any specific requirements for the offering.
+    2.) The system confirms or rejects the Client's eligibility for the offering.
+
+  Operation: checkBookingAvailability(offeringId)
+  Cross References: Use case: "Process Bookings"
+  Preconditions: The Client has selected an offering for processing.
+  Postconditions:
+    1.) The system checks if the offering is still available for booking.
+    2.) The system marks the offering as either available or unavailable for booking.
+
+  Operation: createBooking(clientId, offeringId)
+  Cross References: Use case: "Process Bookings"
+  Preconditions: Both the Client and the selected offering are eligible and available for booking.
+  Postconditions:
+    1.) A new booking is created for the Client.
+    2.) The offering’s availability is updated accordingly.
+    3.) The booking is added to the Client's list of bookings.
+
+  Operation: cancelBooking(bookingId)
+  Cross References: Use case: "Process Bookings"
+  Preconditions: The booking exists and is associated with the Client.
+  Postconditions:
+    1.) The booking is marked as canceled.
+    2.) The offering’s availability is updated to reflect the cancellation.
+
+  Operation: returnBookingSuccessMessage()
+  Cross References: Use case: "Process Bookings"
+  Preconditions: The booking has been successfully created for the Client.
+  Postconditions:
+    1.) Sends a success message to the Client, confirming the booking.
+
+  Operation: returnBookingFailureMessage()
+  Cross References: Use case: "Process Bookings"
+  Preconditions: The offering was not available or the booking could not be completed.
+  Postconditions:
+    1.) Sends a failure message to the Client, explaining the issue.
+    2.) Allows the Client to retry or select a different offering.
