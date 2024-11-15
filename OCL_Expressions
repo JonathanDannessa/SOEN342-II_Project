@@ -1,0 +1,30 @@
+1.) “Offerings are unique. In other words, multiple offerings on the same day and time slot must be offered at a different location.”
+
+      context Offering
+      inv: Offering.allInstances()->forAll(o1, o2 |
+              o1 <> o2 implies 
+              (o1.schedule.startDate <> o2.schedule.startDate or
+               o1.schedule.startTime <> o2.schedule.startTime or
+               o1.location <> o2.location)
+          )
+
+2.)  “Any client who is underage must necessarily be accompanied by an adult who acts as their guardian.”
+
+        context Client
+        inv: self.age < 18 implies self.guardian <> null
+
+3.)  “The city associated with an offering must be one the city’s that the instructor has indicated in their availabilities.”
+
+      context Offering
+      inv: self.instructor.availableCities->includes(self.location.city)
+
+4.)  “A client does not have multiple bookings on the same day and time slot.” 
+(for simplicity we consider only identical day and time slots, even though in reality a booking on Monday 3pm – 4pm and another also on Monday 3:30pm – 4:30pm should not be acceptable.)
+
+      context Client
+      inv: self.bookings->forAll(b1, b2 |
+          b1 <> b2 implies 
+          (b1.startTime <> b2.startTime or
+           b1.lesson.startTime <> b2.lesson.startTime or
+           b1.lesson.schedule.startDate <> b2.lesson.schedule.startDate)
+      )
