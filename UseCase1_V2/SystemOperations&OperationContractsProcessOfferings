@@ -1,0 +1,79 @@
+**System Operations**
+  1. requestAvailableOfferings(specialization, city)
+  Description: This operation retrieves a list of offerings that match the instructor’s specialization and city.
+  Actor: Instructor
+
+  2. selectOffering(offeringId)
+  Description: This operation allows the instructor to select a specific offering to take on.
+  Actor: Instructor
+
+  3. checkInstructorAvailability(instructorId, offeringId)
+  Description: This operation checks whether the instructor meets the specialization and city requirements for the selected offering.
+  Actor: Administrator
+
+  4. checkOfferingAvailability(offeringId)
+  Description: This operation checks if the offering is still available (i.e., not already taken by another instructor).
+  Actor: Administrator
+
+  5. assignInstructorToOffering(instructorId, offeringId)
+  Description: This operation assigns the instructor to the selected offering, marking it as unavailable for others.
+  Actor: Administrator
+
+  6. returnSuccessMessage()
+  Description: Sends a success message back to the instructor if the offering has been successfully assigned.
+  Actor: Administrator
+
+  7. returnFailureMessage()
+  Description: Sends a failure message to the instructor if the offering is unavailable.
+  Actor: Administrator
+
+**Operation Contracts**
+
+  Operation: requestAvailableOfferings(specialization, city)
+  Cross References: Use case: "Process Offerings"
+  Preconditions: The system has valid offerings for the instructor's specialization and city.
+  Postconditions:
+   1.) A list of available offerings is generated.
+   2.) The system presents the list to the instructor.
+
+  Operation: selectOffering(offeringId)
+  Cross References: Use case: "Process Offerings"
+  Preconditions: The system has provided a valid list of available offerings.
+  Postconditions:
+    1.) The offering is selected for processing.
+    2.) The system proceeds to check instructor and offering availability.
+
+  Operation: checkInstructorAvailability(instructorId, offeringId)
+  Cross References: Use case: "Process Offerings"
+  Preconditions: The instructor has selected an offering.
+  Postconditions:
+    1.)The system checks if the instructor meets the offering requirements.
+    2.)The system confirms or rejects the instructor's eligibility.
+
+  Operation: checkOfferingAvailability(offeringId)
+  Cross References: Use case: "Process Offerings"
+  Preconditions: The instructor has selected an offering for processing.
+  Postconditions:
+    1.) The system checks if the offering is still available.
+    2.) The system marks the offering as either available or unavailable.
+
+  Operation: assignInstructorToOffering(instructorId, offeringId)
+  Cross References: Use case: "Process Offerings"
+  Preconditions: Both the instructor and offering are available and valid.
+  Postconditions:
+    1.) The instructor is assigned to the offering.
+    2.) The offering is marked as no longer available for other instructors.
+
+  Operation: returnSuccessMessage()
+  Cross References: Use case: "Process Offerings"
+  Preconditions: The instructor has been successfully assigned to the offering.
+  Postconditions:
+    1.) The system sends a success message to the instructor.
+    2.) The system marks the operation as complete.
+
+  Operation: returnFailureMessage()
+  Cross References: Use case: "Process Offerings"
+  Preconditions: The offering was not available for the instructor.
+  Postconditions:
+    1.) The system sends a failure message to the instructor.
+    2.) The system marks the operation as incomplete and ready for retry.
