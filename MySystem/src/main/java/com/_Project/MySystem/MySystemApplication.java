@@ -891,6 +891,38 @@ public class MySystemApplication implements CommandLineRunner {
 		}
 	}
 
+	public void viewBookingsByInstructor(Scanner scanner) {
+		System.out.print("Enter the instructor email: ");
+		String instructorEmail = scanner.nextLine().trim();
+
+		Instructor instructor = instructorRepository.findByEmail(instructorEmail);
+		if (instructor == null) {
+			System.out.println("Instructor not found.");
+			return;
+		}
+
+		List<Booking> bookings = bookingRepository.findAll().stream()
+				.filter(booking -> booking.getLesson().getInstructor() != null &&
+						booking.getLesson().getInstructor().getId().equals(instructor.getId()))
+				.toList();
+
+		if (bookings.isEmpty()) {
+			System.out.println("No bookings found for this instructor.");
+			return;
+		}
+
+		System.out.println("\nBookings for Instructor: " + instructor.getFirstName() + " " + instructor.getLastName());
+		bookings.forEach(booking -> {
+			System.out.println("Booking ID: " + booking.getId() +
+					" | Lesson: " + booking.getLesson().getName() +
+					" | Client: " + booking.getClient().getFirstName() +
+					" " + booking.getClient().getLastName() +
+					" | Time: " + booking.getStartTime() + "-" + booking.getEndTime());
+		});
+	}
+
+
+
 
 }
 
