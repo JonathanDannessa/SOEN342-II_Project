@@ -941,6 +941,59 @@ public class MySystemApplication implements CommandLineRunner {
 		});
 	}
 
+	public void viewBookingsByLocation(Scanner scanner) {
+		System.out.print("Enter the location name: ");
+		String locationName = scanner.nextLine().trim();
+
+		Location location = locationRepository.findAll().stream()
+				.filter(loc -> loc.getName().equalsIgnoreCase(locationName))
+				.findFirst()
+				.orElse(null);
+
+		if (location == null) {
+			System.out.println("Location not found.");
+			return;
+		}
+
+		List<Booking> bookings = bookingRepository.findAll().stream()
+				.filter(booking -> booking.getLesson().getOffering().getLocation().getId().equals(location.getId()))
+				.toList();
+
+		if (bookings.isEmpty()) {
+			System.out.println("No bookings found for this location.");
+			return;
+		}
+
+		System.out.println("\nBookings at " + location.getName() + " in " + location.getCity() + ":");
+		bookings.forEach(booking -> {
+			System.out.println("Booking ID: " + booking.getId() +
+					" | Lesson: " + booking.getLesson().getName() +
+					" | Client: " + booking.getClient().getFirstName() +
+					" " + booking.getClient().getLastName() +
+					" | Time: " + booking.getStartTime() + "-" + booking.getEndTime());
+		});
+	}
+
+	public void viewAllCancellations() {
+		List<Booking> canceledBookings = bookingRepository.findAll().stream()
+				.filter(Booking::getIsCancelled)
+				.toList();
+
+		if (canceledBookings.isEmpty()) {
+			System.out.println("No canceled bookings found.");
+			return;
+		}
+
+		System.out.println("\nCanceled Bookings:");
+		canceledBookings.forEach(booking -> {
+			System.out.println("Booking ID: " + booking.getId() +
+					" | Lesson: " + booking.getLesson().getName() +
+					" | Client: " + booking.getClient().getFirstName() +
+					" " + booking.getClient().getLastName() +
+					" | Time: " + booking.getStartTime() + "-" + booking.getEndTime());
+		});
+	}
+
 
 }
 
