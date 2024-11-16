@@ -1013,6 +1013,23 @@ public class MySystemApplication implements CommandLineRunner {
 		});
 	}
 
+	public void viewPopularOfferings() {
+		List<Offering> offerings = offeringRepository.findAll();
+
+		offerings.sort((o1, o2) -> {
+			long bookings1 = o1.getLessons().stream().filter(Lesson::getIsBooked).count();
+			long bookings2 = o2.getLessons().stream().filter(Lesson::getIsBooked).count();
+			return Long.compare(bookings2, bookings1); // Descending order
+		});
+
+		System.out.println("\nPopular Offerings:");
+		for (Offering offering : offerings) {
+			long bookingsCount = offering.getLessons().stream().filter(Lesson::getIsBooked).count();
+			System.out.println("Offering: " + offering.getTypeOfLesson() +
+					" | Location: " + offering.getLocation().getName() +
+					" | Bookings: " + bookingsCount);
+		}
+	}
 
 
 }
