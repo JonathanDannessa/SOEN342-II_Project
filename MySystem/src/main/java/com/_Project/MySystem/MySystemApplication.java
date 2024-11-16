@@ -994,6 +994,26 @@ public class MySystemApplication implements CommandLineRunner {
 		});
 	}
 
+	public void viewLessonsWithoutBookings() {
+		List<Lesson> availableLessons = lessonRepository.findAll().stream()
+				.filter(lesson -> !lesson.getIsBooked())
+				.toList();
+
+		if (availableLessons.isEmpty()) {
+			System.out.println("All lessons are currently booked.");
+			return;
+		}
+
+		System.out.println("\nAvailable Lessons:");
+		availableLessons.forEach(lesson -> {
+			System.out.println("Lesson ID: " + lesson.getId() +
+					" | Name: " + lesson.getName() +
+					" | Time: " + lesson.getStartTime() + "-" + lesson.getEndTime() +
+					" | Instructor: " + (lesson.getInstructor() != null ? lesson.getInstructor().getFirstName() : "Unassigned"));
+		});
+	}
+
+
 
 }
 
