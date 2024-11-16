@@ -921,7 +921,25 @@ public class MySystemApplication implements CommandLineRunner {
 		});
 	}
 
+	public void viewUnderageClients() {
+		List<Client> underageClients = clientRepository.findAll().stream()
+				.filter(client -> client.getAge() < 18)
+				.toList();
 
+		if (underageClients.isEmpty()) {
+			System.out.println("No underage clients found.");
+			return;
+		}
+
+		System.out.println("\nUnderage Clients and Guardians:");
+		underageClients.forEach(client -> {
+			String guardianInfo = client.getGuardian() != null ?
+					client.getGuardian().getFirstName() + " " + client.getGuardian().getLastName() : "No Guardian";
+			System.out.println("Client: " + client.getFirstName() + " " + client.getLastName() +
+					" | Age: " + client.getAge() +
+					" | Guardian: " + guardianInfo);
+		});
+	}
 
 
 }
