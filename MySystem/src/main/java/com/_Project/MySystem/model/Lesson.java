@@ -46,5 +46,9 @@ public class Lesson {
             this.offering.checkIfAvailableToPublic();
         }
     }
+    public boolean checkOverlap(Lesson otherLesson) {
+        if (otherLesson == null) return false;
+        return this.startTime.isBefore(otherLesson.endTime) && otherLesson.startTime.isBefore(this.endTime);
+    }
 }
 
